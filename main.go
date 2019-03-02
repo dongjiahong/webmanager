@@ -15,10 +15,17 @@ func main() {
 			"message": name,
 		})
 	})
-	r.GET("/edit/join", api.ApiJoin)
+	edit := r.Group("/edit")
+	{
+		edit.GET("/join", api.JoinMp4)
+		edit.GET("/giftomp4", api.GifToMp4)
+	}
 
-	r.GET("/dump/lq", api.ApiDumpLoopQueue)
-	r.GET("/dump/dq", api.ApiDumpDoneQueue)
+	dump := r.Group("/dump")
+	{
+		dump.GET("/lq", api.ApiDumpLoopQueue)
+		dump.GET("/dq", api.ApiDumpDoneQueue)
+	}
 
 	goque.Init()
 

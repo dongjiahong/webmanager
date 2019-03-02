@@ -8,7 +8,7 @@ import (
 	"webmanager/util"
 )
 
-// 给要拼接的视频名，返回拼接的视频，或者错误信息
+// JoinVideo 给要拼接的视频名，返回拼接的视频，或者错误信息
 func JoinVideo(args string) (string, error) {
 	fileName := make([]string, 0, 2)
 	var outputName string
@@ -19,7 +19,7 @@ func JoinVideo(args string) (string, error) {
 	}
 
 	if len(fileName) == 0 {
-		return "", fmt.Errorf("no video give")
+		return "", fmt.Errorf("no video given")
 	}
 
 	fileContent := strings.Join(fileName, "\n")
@@ -31,6 +31,26 @@ func JoinVideo(args string) (string, error) {
 
 	cmd := exec.Command("ffmpeg", "-f", "concat", "-safe", "0", "-i", tmpFile, "-c", "copy", util.GetCommonPath("out")+outputName+".mp4")
 
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		fmt.Println("Execute command failed: ", err, " out: ", string(output))
+		return "", fmt.Errorf("%v output: %s", err, string(output))
+	}
+	return outputName, nil
+}
+
+// GifToMp4 将gif转化为MP4
+func GifToMp4(arg string) (string, error) {
+	fileName := util.GetCommonPath("ori") + arg
+
+	if len(fileName) == 0 {
+		return "", fmt.Errorf("no gif given")
+	}
+
+	outputName := fileName + ".mp4"
+
+	// ffmpeg -f gif -i animation.gif animation.mp4
+	cmd := exec.Command("ffmpeg", "-f", "gif", "-i", fileName, outputName)
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		fmt.Println("Execute command failed: ", err, " out: ", string(output))
