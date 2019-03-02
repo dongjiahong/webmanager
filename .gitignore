@@ -1,0 +1,6 @@
+ori_data/
+out_data/
+tmp_data/
+*.log
+*.swp
+.vscode
