@@ -2,6 +2,7 @@ package goque
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"reflect"
 	"sync"
