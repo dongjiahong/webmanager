@@ -3,9 +3,13 @@ module webmanager
 go 1.12
 
 require (
+	github.com/dongjiahong/gotools v0.0.0-20170116112413-e26dca9ea677
 	github.com/gin-contrib/sse v0.0.0-20190301062529-5545eab6dad3 // indirect
 	github.com/gin-gonic/gin v1.3.0
+	github.com/go-sql-driver/mysql v1.4.1 // indirect
 	github.com/golang/protobuf v1.3.0 // indirect
+	github.com/jinzhu/gorm v1.9.2
+	github.com/jinzhu/inflection v0.0.0-20180308033659-04140366298a // indirect
 	github.com/mattn/go-isatty v0.0.6 // indirect
 	github.com/satori/go.uuid v1.2.1-0.20181028125025-b2ce2384e17b
 	github.com/ugorji/go/codec v0.0.0-20190204201341-e444a5086c43 // indirect

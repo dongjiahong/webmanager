@@ -12,9 +12,8 @@ import (
 func JoinVideo(args string) (string, error) {
 	fileName := make([]string, 0, 2)
 	var outputName string
-	fmt.Println(" join ===> name: ", args)
 	for _, name := range strings.Split(args, ",") {
-		fileName = append(fileName, fmt.Sprintf("file '%s'", util.GetCommonPath("ori")+name))
+		fileName = append(fileName, fmt.Sprintf("file '%s'", util.GetCommonPath("video")+name))
 		outputName += name
 	}
 
@@ -29,7 +28,7 @@ func JoinVideo(args string) (string, error) {
 	}
 	// ffmpeg -f concat -i filelist.txt -c copy output
 
-	cmd := exec.Command("ffmpeg", "-f", "concat", "-safe", "0", "-i", tmpFile, "-c", "copy", util.GetCommonPath("out")+outputName+".mp4")
+	cmd := exec.Command("ffmpeg", "-y", "-f", "concat", "-safe", "0", "-i", tmpFile, "-c", "copy", util.GetCommonPath("video")+outputName)
 
 	output, err := cmd.CombinedOutput()
 	if err != nil {
@@ -41,16 +40,16 @@ func JoinVideo(args string) (string, error) {
 
 // GifToMp4 将gif转化为MP4
 func GifToMp4(arg string) (string, error) {
-	fileName := util.GetCommonPath("ori") + arg
+	fileName := util.GetCommonPath("img") + arg
 
 	if len(fileName) == 0 {
 		return "", fmt.Errorf("no gif given")
 	}
 
-	outputName := fileName + ".mp4"
+	outputName := util.GetCommonPath("video") + fileName + ".mp4"
 
 	// ffmpeg -f gif -i animation.gif animation.mp4
-	cmd := exec.Command("ffmpeg", "-f", "gif", "-i", fileName, outputName)
+	cmd := exec.Command("ffmpeg", "-y", "-f", "gif", "-i", fileName, outputName)
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		fmt.Println("Execute command failed: ", err, " out: ", string(output))

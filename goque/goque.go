@@ -11,8 +11,8 @@ import (
 )
 
 type Goque struct {
-	lq *Queue // 任务接受队列 loop queue
-	dq *Queue // 任务处理队列 done queue // XXX 这些结果应该本应该放在redis里等地方
+	lq *Queue `json:"loop_queue"` // 任务接受队列 loop queue
+	dq *Queue `json:"done_queue"` // 任务处理队列 done queue // XXX 这些结果应该本应该放在redis里等地方
 	tk *time.Ticker
 	wg sync.WaitGroup
 }
@@ -94,7 +94,6 @@ func (g *Goque) Dump() string {
 }
 
 // 打印结果队列
-func (g *Goque) DumpDone() string {
-	q, _ := json.Marshal(g.dq.buf)
-	return string(q)
+func (g *Goque) DumpDone() *Goque {
+	return g
 }

@@ -9,8 +9,12 @@ import (
 
 var dataPath string
 
-func init() {
-	dataPath = "/Users/lele/tmp/go/webmanager/"
+type Conf struct {
+	MediaPath string `json:"media_path"`
+}
+
+func Init(conf *Conf) {
+	dataPath = conf.MediaPath
 }
 
 func IsExist(path string) bool {
@@ -25,7 +29,7 @@ func IsExist(path string) bool {
 }
 
 func GetCommonPath(kind string) string {
-	path := dataPath + fmt.Sprintf("%s_data/", kind)
+	path := dataPath + fmt.Sprintf("%s/", kind)
 	if !IsExist(path) {
 		if err := os.MkdirAll(path, os.ModePerm); err != nil {
 			log.Println("[GetCommonPath] err: ", err)
