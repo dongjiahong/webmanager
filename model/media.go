@@ -1,7 +1,7 @@
 package model
 
 import (
-	"log"
+	"webmanager/task"
 )
 
 type Media struct {
@@ -18,12 +18,29 @@ type Media struct {
 
 func GetMedia(videoOrPic string, page, pageSize int) ([]Media, error) {
 	medias := make([]Media, 0, 10)
-	//err := gdb.Where("video_or_pic = ?", videoOrPic).Find(&medias).GetErrors()
 	err := gdb.Offset(page*pageSize).Limit(pageSize).Where("video_or_pic = ?", videoOrPic).Find(&medias).GetErrors()
 	if len(err) != 0 {
 		return nil, err[0]
 	}
 
-	log.Println("=====> medias: ", medias)
 	return medias, nil
+}
+
+func GetTasks(page, pageSize int) ([]task.Task, error) {
+	tasks := make([]task.Task, 0, 10)
+	err := gdb.Offset(page * pageSize).Limit(pageSize).Find(&tasks).GetErrors()
+	if len(err) != 0 {
+		return nil, err[0]
+	}
+
+	return tasks, nil
+}
+
+func WriteTaskToDB(t *task.Task) error {
+	gdb.NewRecord(t)
+	errs := gdb.Create(t).GetErrors()
+	if len(errs) > 0 {
+		return errs[0]
+	}
+	return nil
 }

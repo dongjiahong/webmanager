@@ -36,7 +36,7 @@ func (r *Resp) toJson() []byte {
 func JoinMp4(c *gin.Context) {
 	names := c.Query("names")
 
-	goque.GetGoque().Add(ffmpeg.JoinVideo, names)
+	goque.GetGoque().Add(ffmpeg.JoinVideo, names, "joinVideo")
 
 	c.Data(200, "application/json", newResp("add task success", nil).toJson())
 	return
@@ -47,7 +47,7 @@ func JoinMp4(c *gin.Context) {
 func GifToMp4(c *gin.Context) {
 	name := c.Query("name")
 
-	goque.GetGoque().Add(ffmpeg.GifToMp4, name)
+	goque.GetGoque().Add(ffmpeg.GifToMp4, name, "gifToMp4")
 
 	c.JSON(200, gin.H{
 		"message": "add task ok",
@@ -63,8 +63,24 @@ func DumpLoopQueue(c *gin.Context) {
 	return
 }
 
-func DumpDoneQueue(c *gin.Context) {
-	c.Data(200, "application/json", newResp("ok", goque.GetGoque().DumpDone()).toJson())
+func DumpTaskQueue(c *gin.Context) {
+	page, err := strconv.Atoi(c.Param("page"))
+	if err != nil {
+		c.Data(200, "application/json", newResp(err.Error(), nil).toJson())
+		return
+	}
+	pageSize, err := strconv.Atoi(c.Param("pagesize"))
+	if err != nil {
+		c.Data(200, "application/json", newResp(err.Error(), nil).toJson())
+		return
+	}
+
+	tasks, err := model.GetTasks(page, pageSize)
+	if err != nil {
+		c.Data(200, "application/json", newResp(err.Error(), nil).toJson())
+		return
+	}
+	c.Data(200, "application/json", newResp("ok", tasks).toJson())
 	return
 }
 
