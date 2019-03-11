@@ -39,6 +39,14 @@ func main() {
 		media.Static("/video", "./media/video")
 	}
 
+	r.StaticFile("/", "./dist/index.html")
+	s := r.Group("/static")
+	{
+		s.Static("/css", "./dist/static/css")
+		s.Static("/fonts", "./dist/static/fonts")
+		s.Static("/js", "./dist/static/js")
+	}
+
 	var conf Conf
 	if err := gotools.DecodeJsonFromFile("config/manager.json", &conf); err != nil {
 		panic(err)

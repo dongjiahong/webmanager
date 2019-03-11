@@ -3,12 +3,14 @@ package api
 import (
 	"encoding/json"
 	"log"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 
 	"webmanager/ffmpeg"
 	"webmanager/goque"
 	"webmanager/model"
+	"webmanager/util"
 )
 
 type Resp struct {
@@ -122,6 +124,27 @@ func UploadMedia(c *gin.Context) {
 		log.Println("[UploadMedia] decode json err: ", err.Error(), " req: ", *c.Request)
 		c.Data(200, "application/json", newResp(err.Error(), nil).toJson())
 		return
+	}
+
+	if mp.Source == "upload" { // 我们要去下载该视频
+		kind := func() string {
+			if mp.MediaType == "mp4" {
+				return "video"
+			}
+			return "img"
+		}()
+		fileName := func() string {
+			if strings.HasSuffix(mp.FileName, "mp4") {
+				return mp.FileName
+			}
+			return mp.FileName + ".mp4"
+		}()
+		filePath := util.GetCommonPath(kind) + fileName
+		if err := util.DownloadWithUrl(mp.Url, filePath); err != nil {
+			log.Println("[UploadMedia] download file err: ", err.Error())
+			c.Data(200, "application/json", newResp(err.Error(), nil).toJson())
+			return
+		}
 	}
 
 	if err := model.WriteMediaToDB(&mp); err != nil {

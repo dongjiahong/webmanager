@@ -2,10 +2,13 @@ package util
 
 import (
 	"crypto/md5"
+	"crypto/tls"
 	"encoding/hex"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
+	"net/http"
 	"os"
 )
 
@@ -59,4 +62,37 @@ func GetMd5(s string) string {
 	h := md5.New()
 	h.Write([]byte(s))
 	return hex.EncodeToString(h.Sum(nil))
+}
+
+// 下载文件到本地，并返回本地路径和错误信息
+func DownloadWithUrl(url, filePath string) error {
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true}, // 客户端不校验省的x509错误
+	}
+	client := &http.Client{Transport: tr}
+
+	//提交请求
+	reqest, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return fmt.Errorf("[DownloadWithUrl] new request err: %v, url: %s", err, url)
+	}
+
+	//处理返回结果
+	resp, err := client.Do(reqest)
+	if resp != nil {
+		defer resp.Body.Close()
+	}
+	if err != nil {
+		return fmt.Errorf("[DownloadWithUrl] get err: %v, url: %s", err, url)
+	}
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return fmt.Errorf("[DownloadWithUrl] read body err: %v", err)
+	}
+
+	if err := ioutil.WriteFile(filePath, body, 0666); err != nil {
+		return fmt.Errorf("[DownloadWithUrl] write file err: %v", err)
+	}
+	return nil
 }
