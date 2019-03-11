@@ -2,6 +2,7 @@ package ffmpeg
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os/exec"
 	"strings"
 
@@ -22,9 +23,11 @@ func JoinVideo(args string) (string, error) {
 
 	fileContent := strings.Join(fileName, "\n")
 	tmpFile := util.GetCommonPath("tmp") + "tmp"
-	if err := util.WriteFile(tmpFile, []byte(fileContent)); err != nil {
+
+	if err := ioutil.WriteFile(tmpFile, []byte(fileContent), 0666); err != nil {
 		return "", fmt.Errorf("write tmp file err: %v", err)
 	}
+
 	// ffmpeg -f concat -i filelist.txt -c copy output
 
 	cmd := exec.Command("ffmpeg", "-y", "-f", "concat", "-safe", "0", "-i", tmpFile, "-c", "copy", util.GetCommonPath("video")+outputName)

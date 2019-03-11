@@ -137,7 +137,8 @@ func UploadMedia(c *gin.Context) {
 			if strings.HasSuffix(mp.FileName, "mp4") {
 				return mp.FileName
 			}
-			return mp.FileName + ".mp4"
+			mp.FileName += ".mp4"
+			return mp.FileName
 		}()
 		filePath := util.GetCommonPath(kind) + fileName
 		if err := util.DownloadWithUrl(mp.Url, filePath); err != nil {

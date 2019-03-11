@@ -7,3 +7,4 @@ tmp_data/
 .DS_Store
 media/
 dist/
+config/*.json
