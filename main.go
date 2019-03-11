@@ -22,7 +22,7 @@ func main() {
 	{
 		get.GET("/img/:page/:pagesize", api.GetImg)
 		get.GET("/video/:page/:pagesize", api.GetVideo)
-		get.GET("/tq/:page/:pagesize", api.DumpTaskQueue)
+		get.GET("/tq/:page/:pagesize", api.GetTaskQueue)
 	}
 
 	edit := r.Group("/edit")
@@ -31,10 +31,7 @@ func main() {
 		edit.GET("/giftomp4", api.GifToMp4)
 	}
 
-	dump := r.Group("/dump")
-	{
-		dump.GET("/lq", api.DumpLoopQueue)
-	}
+	r.POST("/upload", api.UploadMedia)
 
 	media := r.Group("/media")
 	{

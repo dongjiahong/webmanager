@@ -11,11 +11,10 @@ import (
 // JoinVideo 给要拼接的视频名，返回拼接的视频，或者错误信息
 func JoinVideo(args string) (string, error) {
 	fileName := make([]string, 0, 2)
-	var outputName string
 	for _, name := range strings.Split(args, ",") {
 		fileName = append(fileName, fmt.Sprintf("file '%s'", util.GetCommonPath("video")+name))
-		outputName += name
 	}
+	outputName := "joinVideo-" + util.GetMd5(args) + ".mp4"
 
 	if len(fileName) == 0 {
 		return "", fmt.Errorf("no video given")

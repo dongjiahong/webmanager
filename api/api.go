@@ -2,7 +2,7 @@ package api
 
 import (
 	"encoding/json"
-	"strconv"
+	"log"
 
 	"github.com/gin-gonic/gin"
 
@@ -34,9 +34,14 @@ func (r *Resp) toJson() []byte {
 // JoinMp4 拼接视频，需要的参数信息
 // names: ["1.mp4", "2.mp4"] eg: curl "localhost:8080/edit/join?names=01.mp4,012.mp4"
 func JoinMp4(c *gin.Context) {
-	names := c.Query("names")
+	mp, err := newMaybeParams(c)
+	if err != nil {
+		log.Println("[JoinMp4] get params err: ", err.Error())
+		c.Data(200, "application/json", newResp(err.Error(), nil).toJson())
+		return
+	}
 
-	goque.GetGoque().Add(ffmpeg.JoinVideo, names, "joinVideo")
+	goque.GetGoque().Add(ffmpeg.JoinVideo, mp.FileNames, "joinVideo")
 
 	c.Data(200, "application/json", newResp("add task success", nil).toJson())
 	return
@@ -45,37 +50,28 @@ func JoinMp4(c *gin.Context) {
 // GifToMp4 将gif转为MP4
 // curl "localhost:8080/edit/giftomp4?name=01.gif"
 func GifToMp4(c *gin.Context) {
-	name := c.Query("name")
-
-	goque.GetGoque().Add(ffmpeg.GifToMp4, name, "gifToMp4")
-
-	c.JSON(200, gin.H{
-		"message": "add task ok",
-	})
-	return
-}
-
-func DumpLoopQueue(c *gin.Context) {
-
-	c.JSON(200, gin.H{
-		"message": goque.GetGoque().Dump(),
-	})
-	return
-}
-
-func DumpTaskQueue(c *gin.Context) {
-	page, err := strconv.Atoi(c.Param("page"))
+	mp, err := newMaybeParams(c)
 	if err != nil {
-		c.Data(200, "application/json", newResp(err.Error(), nil).toJson())
-		return
-	}
-	pageSize, err := strconv.Atoi(c.Param("pagesize"))
-	if err != nil {
+		log.Println("[GifToMp4] get params err: ", err.Error())
 		c.Data(200, "application/json", newResp(err.Error(), nil).toJson())
 		return
 	}
 
-	tasks, err := model.GetTasks(page, pageSize)
+	goque.GetGoque().Add(ffmpeg.GifToMp4, mp.FileName, "gifToMp4")
+
+	c.Data(200, "application/json", newResp("add task success", nil).toJson())
+	return
+}
+
+func GetTaskQueue(c *gin.Context) {
+	mp, err := newMaybeParams(c)
+	if err != nil {
+		log.Println("[GetTaskQueue] get params err: ", err.Error())
+		c.Data(200, "application/json", newResp(err.Error(), nil).toJson())
+		return
+	}
+
+	tasks, err := model.GetTasks(mp.Page, mp.PageSize)
 	if err != nil {
 		c.Data(200, "application/json", newResp(err.Error(), nil).toJson())
 		return
@@ -87,18 +83,14 @@ func DumpTaskQueue(c *gin.Context) {
 // GetImg 获取image信息
 // page: 第几页， pagesize：每页的数量
 func GetImg(c *gin.Context) {
-	page, err := strconv.Atoi(c.Param("page"))
+	mp, err := newMaybeParams(c)
 	if err != nil {
-		c.Data(200, "application/json", newResp(err.Error(), nil).toJson())
-		return
-	}
-	pageSize, err := strconv.Atoi(c.Param("pagesize"))
-	if err != nil {
+		log.Println("[GetImg] get params err: ", err.Error())
 		c.Data(200, "application/json", newResp(err.Error(), nil).toJson())
 		return
 	}
 
-	medias, err := model.GetMedia("img", page, pageSize)
+	medias, err := model.GetMedia("img", mp.Page, mp.PageSize)
 	if err != nil {
 		c.Data(200, "application/json", newResp(err.Error(), nil).toJson())
 		return
@@ -108,22 +100,36 @@ func GetImg(c *gin.Context) {
 }
 
 func GetVideo(c *gin.Context) {
-	page, err := strconv.Atoi(c.Param("page"))
+	mp, err := newMaybeParams(c)
 	if err != nil {
-		c.Data(200, "application/json", newResp(err.Error(), nil).toJson())
-		return
-	}
-	pageSize, err := strconv.Atoi(c.Param("pagesize"))
-	if err != nil {
+		log.Println("[GetVideo] get params err: ", err.Error())
 		c.Data(200, "application/json", newResp(err.Error(), nil).toJson())
 		return
 	}
 
-	medias, err := model.GetMedia("video", page, pageSize)
+	medias, err := model.GetMedia("video", mp.Page, mp.PageSize)
 	if err != nil {
 		c.Data(200, "application/json", newResp(err.Error(), nil).toJson())
 		return
 	}
 	c.Data(200, "application/json", newResp("ok", medias).toJson())
+	return
+}
+
+func UploadMedia(c *gin.Context) {
+	var mp model.Media
+	if err := c.ShouldBindJSON(&mp); err != nil {
+		log.Println("[UploadMedia] decode json err: ", err.Error(), " req: ", *c.Request)
+		c.Data(200, "application/json", newResp(err.Error(), nil).toJson())
+		return
+	}
+
+	if err := model.WriteMediaToDB(&mp); err != nil {
+		log.Println("[UploadMedia] write db err: ", err.Error())
+		c.Data(200, "application/json", newResp(err.Error(), nil).toJson())
+		return
+	}
+
+	c.Data(200, "application/json", newResp("ok", nil).toJson())
 	return
 }
